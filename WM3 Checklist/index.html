@@ -60,23 +60,24 @@
 
 <body>
   <main class="stage">
-    <svg id="scene" viewBox="0 0 1557 2048" preserveAspectRatio="xMidYMid meet" aria-label="Checklist">
-      <image href="./Checklist-empty.png" x="0" y="0" width="1557" height="2048" />
+    <svg id="scene" viewBox="0 0 1557 2048" preserveAspectRatio="xMidYMid meet" aria-label="">
+      <!-- ✅ FIXED: lowercase filename to match deployed asset -->
+      <image href="./checklist-empty.png" x="0" y="0" width="1557" height="2048" />
 
       <!-- CHECKMARKS (hidden until toggled) -->
-      <image id="chk-box1"  href="./Checkmark.png" x="207" y="438"  width="99" height="112" visibility="hidden" />
-      <image id="chk-box2"  href="./Checkmark.png" x="206" y="576"  width="99" height="112" visibility="hidden" />
-      <image id="chk-box3"  href="./Checkmark.png" x="205" y="734"  width="100" height="112" visibility="hidden" />
-      <image id="chk-box4"  href="./Checkmark.png" x="210" y="876"  width="99" height="112" visibility="hidden" />
-      <image id="chk-box5"  href="./Checkmark.png" x="212" y="1024" width="99" height="112" visibility="hidden" />
-      <image id="chk-box6"  href="./Checkmark.png" x="212" y="1179" width="99" height="112" visibility="hidden" />
-      <image id="chk-box7"  href="./Checkmark.png" x="208" y="1326" width="100" height="112" visibility="hidden" />
-      <image id="chk-box8"  href="./Checkmark.png" x="212" y="1485" width="99" height="112" visibility="hidden" />
-      <image id="chk-box9"  href="./Checkmark.png" x="216" y="1638" width="99" height="112" visibility="hidden" />
+      <!-- ✅ FIXED: lowercase filename to match deployed asset -->
+      <image id="chk-box1"  href="./checkmark.png" x="207" y="438"  width="99" height="112" visibility="hidden" />
+      <image id="chk-box2"  href="./checkmark.png" x="206" y="576"  width="99" height="112" visibility="hidden" />
+      <image id="chk-box3"  href="./checkmark.png" x="205" y="734"  width="100" height="112" visibility="hidden" />
+      <image id="chk-box4"  href="./checkmark.png" x="210" y="876"  width="99" height="112" visibility="hidden" />
+      <image id="chk-box5"  href="./checkmark.png" x="212" y="1024" width="99" height="112" visibility="hidden" />
+      <image id="chk-box6"  href="./checkmark.png" x="212" y="1179" width="99" height="112" visibility="hidden" />
+      <image id="chk-box7"  href="./checkmark.png" x="208" y="1326" width="100" height="112" visibility="hidden" />
+      <image id="chk-box8"  href="./checkmark.png" x="212" y="1485" width="99" height="112" visibility="hidden" />
+      <image id="chk-box9"  href="./checkmark.png" x="216" y="1638" width="99" height="112" visibility="hidden" />
 
-      <!-- ✅ NEW: last checkbox -->
-      <!-- If your last box sits a bit higher/lower, press D to view hitboxes and nudge y by ~10–30. -->
-      <image id="chk-box10" href="./Checkmark.png" x="216" y="1792" width="99" height="112" visibility="hidden" />
+      <!-- last checkbox -->
+      <image id="chk-box10" href="./checkmark.png" x="216" y="1792" width="99" height="112" visibility="hidden" />
 
       <!-- HITBOXES (click targets) -->
       <rect class="hitbox" data-key="box1"  x="207" y="438"  width="110" height="120" />
@@ -88,8 +89,6 @@
       <rect class="hitbox" data-key="box7"  x="208" y="1326" width="112" height="120" />
       <rect class="hitbox" data-key="box8"  x="212" y="1485" width="110" height="120" />
       <rect class="hitbox" data-key="box9"  x="216" y="1638" width="110" height="120" />
-
-      <!-- ✅ NEW: last checkbox hitbox -->
       <rect class="hitbox" data-key="box10" x="216" y="1792" width="110" height="120" />
     </svg>
 
@@ -106,17 +105,21 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : {};
-      } catch { return {}; }
+      } catch {
+        return {};
+      }
     }
 
     function saveState(state) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {}
     }
 
     function applyState(state) {
       hitboxes.forEach(h => {
-        const key = h.dataset.key;
-        const chk = document.getElementById("chk-" + key);
+        const key = h.dataset.key;         // e.g., "box1"
+        const chk = document.getElementById("chk-" + key); // e.g., "chk-box1"
         if (chk) chk.setAttribute("visibility", state[key] ? "visible" : "hidden");
       });
     }
