@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Checklist Progress</title>
+
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    body { overscroll-behavior: none; }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+    }
+
+    svg { width: 100%; height: 100%; display: block; }
+
+    .hitbox {
+      fill: rgba(0,0,0,0);
+      cursor: pointer;
+    }
+
+    /* Debug: press D to show outlines */
+    .debug .hitbox {
+      fill: rgba(0,255,255,0.12);
+      stroke: rgba(0,255,255,0.9);
+      stroke-width: 3;
+    }
+
+    .controls {
+      position: fixed;
+      left: 14px;
+      bottom: 14px;
+      z-index: 10;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="stage">
+    <svg id="scene" viewBox="0 0 1557 2048" preserveAspectRatio="xMidYMid meet" aria-label="Checklist">
+      <image href="./Checklist-empty.png" x="0" y="0" width="1557" height="2048" />
+
+      <!-- CHECKMARKS (hidden until toggled) -->
+      <image id="chk-box1"  href="./Checkmark.png" x="207" y="438"  width="99" height="112" visibility="hidden" />
+      <image id="chk-box2"  href="./Checkmark.png" x="206" y="576"  width="99" height="112" visibility="hidden" />
+      <image id="chk-box3"  href="./Checkmark.png" x="205" y="734"  width="100" height="112" visibility="hidden" />
+      <image id="chk-box4"  href="./Checkmark.png" x="210" y="876"  width="99" height="112" visibility="hidden" />
+      <image id="chk-box5"  href="./Checkmark.png" x="212" y="1024" width="99" height="112" visibility="hidden" />
+      <image id="chk-box6"  href="./Checkmark.png" x="212" y="1179" width="99" height="112" visibility="hidden" />
+      <image id="chk-box7"  href="./Checkmark.png" x="208" y="1326" width="100" height="112" visibility="hidden" />
+      <image id="chk-box8"  href="./Checkmark.png" x="212" y="1485" width="99" height="112" visibility="hidden" />
+      <image id="chk-box9"  href="./Checkmark.png" x="216" y="1638" width="99" height="112" visibility="hidden" />
+
+      <!-- ✅ NEW: last checkbox -->
+      <!-- If your last box sits a bit higher/lower, press D to view hitboxes and nudge y by ~10–30. -->
+      <image id="chk-box10" href="./Checkmark.png" x="216" y="1792" width="99" height="112" visibility="hidden" />
+
+      <!-- HITBOXES (click targets) -->
+      <rect class="hitbox" data-key="box1"  x="207" y="438"  width="110" height="120" />
+      <rect class="hitbox" data-key="box2"  x="206" y="576"  width="110" height="120" />
+      <rect class="hitbox" data-key="box3"  x="205" y="734"  width="112" height="120" />
+      <rect class="hitbox" data-key="box4"  x="210" y="876"  width="110" height="120" />
+      <rect class="hitbox" data-key="box5"  x="212" y="1024" width="110" height="120" />
+      <rect class="hitbox" data-key="box6"  x="212" y="1179" width="110" height="120" />
+      <rect class="hitbox" data-key="box7"  x="208" y="1326" width="112" height="120" />
+      <rect class="hitbox" data-key="box8"  x="212" y="1485" width="110" height="120" />
+      <rect class="hitbox" data-key="box9"  x="216" y="1638" width="110" height="120" />
+
+      <!-- ✅ NEW: last checkbox hitbox -->
+      <rect class="hitbox" data-key="box10" x="216" y="1792" width="110" height="120" />
+    </svg>
+
+    <div class="controls">
+      <button class="btn" id="resetBtn" type="button">Reset checks</button>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "checklist_progress_scene_01";
+    const hitboxes = Array.from(document.querySelectorAll(".hitbox"));
+
+    function getState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch { return {}; }
+    }
+
+    function saveState(state) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    function applyState(state) {
+      hitboxes.forEach(h => {
+        const key = h.dataset.key;
+        const chk = document.getElementById("chk-" + key);
+        if (chk) chk.setAttribute("visibility", state[key] ? "visible" : "hidden");
+      });
+    }
+
+    hitboxes.forEach(h => {
+      h.addEventListener("click", () => {
+        const key = h.dataset.key;
+        const state = getState();
+        state[key] = !state[key];
+        applyState(state);
+        saveState(state);
+      });
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      const state = {};
+      hitboxes.forEach(h => state[h.dataset.key] = false);
+      applyState(state);
+      saveState(state);
+    });
+
+    // Debug: press D to show hitbox outlines
+    window.addEventListener("keydown", (e) => {
+      if (e.key.toLowerCase() === "d") document.body.classList.toggle("debug");
+    });
+
+    applyState(getState());
+  </script>
+</body>
+</html>
